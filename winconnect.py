@@ -57,6 +57,9 @@ cmd = "cmd.exe /c %s" % connect_args.c
 print (cmd)
 # 
 # define main
+#host = paramiko.SSHClient()
+#host.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#host.connect(hostname=hostname, username=username, password=password)
 def main():
 	
     # connect to host
@@ -66,16 +69,21 @@ def main():
 
     try:
 	    host.connect(hostname=hostname, username=username, password=password)
-    except paramiko.AuthenticationException as e:
-	    _error = "connection to remote host %s : authentication failed" %hostname
+    except paramiko.AuthenticationException:
+	    _error = (
+		    "Connection to remote host %s : authentication failed. " 
+	        % (hostname)
+        )
 	    logger.error(
 		    "%s", _error
         )
+	    return
     except Exception as e:
 	    _error = "connection to remote host : %s" % e
 	    logger.error(
 		    "%s", _error
         )
+	    return
 
     stdin, stdout, stderr = host.exec_command(cmd)
     err = ''.join(stderr.readlines())
@@ -89,5 +97,9 @@ def main():
 
     print(final_output)
 
+if __name__ == "__main__":
+	main()
+
+
     #close host connection
-    host.close
+    #host.close
